@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: sync-caller-server
+    name: sync-caller
     runtime: node
-    rootDir: server
-    buildCommand: npm install
-    startCommand: node index.js
     plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+

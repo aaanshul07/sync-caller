@@ -2,6 +2,13 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const app = express();
 app.use(cors());
@@ -158,6 +165,17 @@ io.on('connection', (socket) => {
   socket.on('disconnect', handleLeave);
 });
 
+// Serve frontend static build if client/dist exists (production on Render/single host)
+const clientDistPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
 server.listen(PORT, () => {
   console.log(`[Signaling Server] Running on http://localhost:${PORT}`);
 });
+

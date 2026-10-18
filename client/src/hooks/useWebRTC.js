@@ -3,8 +3,16 @@ import { io } from 'socket.io-client';
 import { rtcConfig } from '../utils/rtcConfig';
 import { getUserMediaStream, getDisplayMediaStream } from '../utils/stream';
 
-// Derive signaling server URL (defaults to port 5000 on current host)
-const SERVER_URL = import.meta.env.VITE_SIGNALING_URL || `http://${window.location.hostname}:5000`;
+// Derive signaling server URL:
+// - If VITE_SIGNALING_URL is set, use it.
+// - If running on Vite dev server (port 5173), default to localhost:5000 backend.
+// - Otherwise (production unified build on Render/single host), use current origin.
+const SERVER_URL =
+  import.meta.env.VITE_SIGNALING_URL ||
+  (typeof window !== 'undefined' && window.location.port === '5173'
+    ? `http://${window.location.hostname}:5000`
+    : (typeof window !== 'undefined' ? window.location.origin : ''));
+
 
 export function useWebRTC(roomId, userName, initialMic = true, initialVideo = true) {
   const [localStream, setLocalStream] = useState(null);
